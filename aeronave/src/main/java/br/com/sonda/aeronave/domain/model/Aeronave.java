@@ -14,7 +14,7 @@ import java.time.OffsetDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Aeronaves implements Serializable {
+public class Aeronave implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;
