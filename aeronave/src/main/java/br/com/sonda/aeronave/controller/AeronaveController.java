@@ -24,29 +24,30 @@ public class AeronaveController {
 
      @GetMapping
      public ResponseEntity<Page<AeronaveDTO>> findAll(@PageableDefault(size = 12) Pageable pageable){
-         return ResponseEntity.ok().body(aeronaveService.findAll(pageable));
+         return ResponseEntity.ok().body(aeronaveService.findAll(pageable).map(AeronaveDTO::from));
      }
 
      @GetMapping("/find")
      public ResponseEntity<List<AeronaveDTO>> find(@RequestParam String termo){
-         return ResponseEntity.ok().body(aeronaveService.find(termo));
+         return ResponseEntity.ok().body(aeronaveService.find(termo).stream().map(AeronaveDTO::from).toList());
      }
 
      @GetMapping("/{id}")
     public ResponseEntity<AeronaveDTO> findById(@PathVariable Long id){
-         return ResponseEntity.ok().body(aeronaveService.findById(id));
+         return ResponseEntity.ok().body(AeronaveDTO.from(aeronaveService.findById(id)));
      }
 
      @PostMapping
      public ResponseEntity<AeronaveDTO> save(@Validated(AeronaveDTO.class) @RequestBody AeronaveDTO aeronaveDTO){
          return ResponseEntity.status(HttpStatus.CREATED)
-                 .body(aeronaveService.save(AeronaveDTO.to(aeronaveDTO)));
+                 .body(AeronaveDTO.from(aeronaveService.save(AeronaveDTO.to(aeronaveDTO))));
      }
 
      @PutMapping("/{id}")
     public ResponseEntity<AeronaveDTO> updateById(@PathVariable Long id, @Validated(AeronaveDTO.class)
      @RequestBody AeronaveDTO aeronaveDTO){
          System.out.println(aeronaveDTO);
-         return ResponseEntity.ok().body(aeronaveService.updateById(id, AeronaveDTO.to(aeronaveDTO)));
+         return ResponseEntity.ok().body(AeronaveDTO.
+                 from(aeronaveService.updateById(id, AeronaveDTO.to(aeronaveDTO))));
      }
 }
