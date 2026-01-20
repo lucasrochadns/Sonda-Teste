@@ -2,12 +2,13 @@ package br.com.sonda.aeronave.services;
 
 
 import br.com.sonda.aeronave.domain.model.Aeronave;
-import br.com.sonda.aeronave.controllers.dto.AeronaveDTO;
-import br.com.sonda.aeronave.controllers.dto.AeronavePatchDTO;
-import br.com.sonda.aeronave.controllers.dto.AeronavePorDecadaDTO;
-import br.com.sonda.aeronave.controllers.dto.AeronavePorFabricanteDTO;
+import br.com.sonda.aeronave.dto.AeronaveDTO;
+import br.com.sonda.aeronave.dto.AeronavePatchDTO;
+import br.com.sonda.aeronave.dto.AeronavePorDecadaDTO;
+import br.com.sonda.aeronave.dto.AeronavePorFabricanteDTO;
 import br.com.sonda.aeronave.domain.repository.AeronaveRepository;
 
+import br.com.sonda.aeronave.mapper.AeronaveMapper;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 
@@ -30,31 +31,35 @@ public class AeronaveService {
 
 
     private final AeronaveRepository aeronaveRepository;
+    private final AeronaveMapper mapper;
 
     @Transactional(readOnly = true)
     public Page<AeronaveDTO> findAll(Pageable pageable) {
-        return aeronaveRepository.findAll(pageable).map(AeronaveDTO::from);
+        return aeronaveRepository.findAll(pageable).map(mapper::toDTO);
     }
 
     @Transactional(readOnly = true)
     public List<AeronaveDTO> find(String termo) {
-        return aeronaveRepository.findByTermo(termo).stream().map(AeronaveDTO::from).toList();
+        return aeronaveRepository.findByTermo(termo).stream().map(mapper::toDTO).toList();
     }
 
     @Transactional(readOnly = true)
     public AeronaveDTO findById(Long id) {
-        return AeronaveDTO.from(aeronaveRepository.findById(id)
+        return mapper.toDTO(aeronaveRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Aeronave Não Encontrada: " + id)));
     }
 
     @Transactional
     public AeronaveDTO save(AeronaveDTO aeronave) {
-        return AeronaveDTO.from(aeronaveRepository.save(AeronaveDTO.to(aeronave)));
+        return mapper.toDTO(aeronaveRepository.save(mapper.toEntity(aeronave)));
     }
 
     @Transactional
     public AeronaveDTO updateById(Long id, AeronaveDTO aeronave) {
-        return AeronaveDTO.from(aeronaveRepository.save(AeronaveDTO.to(aeronave)));
+        if(!aeronaveRepository.existsById(aeronave.id())){
+            throw new EntityNotFoundException("ID não existe " + aeronave.id());
+        }
+        return mapper.toDTO(aeronaveRepository.save(mapper.toEntity(aeronave)));
     }
 
     @Transactional
@@ -67,7 +72,7 @@ public class AeronaveService {
 
     @Transactional(readOnly = true)
     public List<AeronaveDTO> findByNaoVendido(){
-      return aeronaveRepository.findByVendidoFalse().stream().map(AeronaveDTO::from).toList();
+      return aeronaveRepository.findByVendidoFalse().stream().map(mapper::toDTO).toList();
     }
 
     @Transactional(readOnly = true)
@@ -75,7 +80,7 @@ public class AeronaveService {
         return aeronaveRepository.findAllByOrderByAnoFabricacaoAsc()
                 .stream().collect(Collectors.groupingBy(
                         a -> (a.getAnoFabricacao() / 10) * 10,
-                        LinkedHashMap::new, Collectors.mapping(AeronaveDTO::from, Collectors.toList())
+                        LinkedHashMap::new, Collectors.mapping(mapper::toDTO, Collectors.toList())
                 )).entrySet()
                 .stream()
                 .map(x -> new AeronavePorDecadaDTO(x.getKey(), x.getValue())).toList();
@@ -86,7 +91,7 @@ public class AeronaveService {
         return aeronaveRepository.findAllByOrderByFabricanteAsc()
                 .stream().collect(Collectors.groupingBy(
                         Aeronave::getFabricante,
-                        LinkedHashMap::new, Collectors.mapping(AeronaveDTO::from, Collectors.toList())
+                        LinkedHashMap::new, Collectors.mapping(mapper::toDTO, Collectors.toList())
                 )).entrySet().stream()
                 .map(x -> new AeronavePorFabricanteDTO(x.getKey(), x.getValue())).toList();
     }
@@ -94,7 +99,7 @@ public class AeronaveService {
     @Transactional(readOnly = true)
     public List<AeronaveDTO> findRecent(){
         return aeronaveRepository.findRecent(OffsetDateTime.now().minusDays(7))
-                .stream().map(AeronaveDTO::from).toList();
+                .stream().map(mapper::toDTO).toList();
     }
 
     @Transactional

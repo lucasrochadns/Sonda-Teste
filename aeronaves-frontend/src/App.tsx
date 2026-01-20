@@ -163,7 +163,7 @@ export default function App() {
 
   async function onExcluir(id?: number) {
     if (typeof id !== "number") return;
-    if (!confirm(`Excluir aeronave #${id}?`)) return;
+
     setBusy(true);
     setError(null);
     try {

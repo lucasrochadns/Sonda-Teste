@@ -1,9 +1,9 @@
-package br.com.sonda.aeronave.controllers.controller;
+package br.com.sonda.aeronave.controllers;
 
-import br.com.sonda.aeronave.controllers.dto.AeronaveDTO;
-import br.com.sonda.aeronave.controllers.dto.AeronavePatchDTO;
-import br.com.sonda.aeronave.controllers.dto.AeronavePorDecadaDTO;
-import br.com.sonda.aeronave.controllers.dto.AeronavePorFabricanteDTO;
+import br.com.sonda.aeronave.dto.AeronaveDTO;
+import br.com.sonda.aeronave.dto.AeronavePatchDTO;
+import br.com.sonda.aeronave.dto.AeronavePorDecadaDTO;
+import br.com.sonda.aeronave.dto.AeronavePorFabricanteDTO;
 import br.com.sonda.aeronave.services.AeronaveService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;

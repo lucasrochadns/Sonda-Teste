@@ -1,4 +1,4 @@
-package br.com.sonda.aeronave.controllers.dto;
+package br.com.sonda.aeronave.dto;
 
 import br.com.sonda.aeronave.domain.model.Fabricante;
 
