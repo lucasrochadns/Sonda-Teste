@@ -3,6 +3,7 @@ package br.com.sonda.aeronave.services;
 
 import br.com.sonda.aeronave.domain.model.Aeronave;
 import br.com.sonda.aeronave.dto.AeronaveDTO;
+import br.com.sonda.aeronave.dto.AeronavePatchDTO;
 import br.com.sonda.aeronave.dto.AeronavePorDecadaDTO;
 import br.com.sonda.aeronave.dto.AeronavePorFabricanteDTO;
 import br.com.sonda.aeronave.repository.AeronaveRepository;
@@ -32,29 +33,29 @@ public class AeronaveService {
     private final AeronaveRepository aeronaveRepository;
 
     @Transactional(readOnly = true)
-    public Page<Aeronave> findAll(Pageable pageable) {
-        return aeronaveRepository.findAll(pageable);
+    public Page<AeronaveDTO> findAll(Pageable pageable) {
+        return aeronaveRepository.findAll(pageable).map(AeronaveDTO::from);
     }
 
     @Transactional(readOnly = true)
-    public List<Aeronave> find(String termo) {
-        return aeronaveRepository.findByTermo(termo);
+    public List<AeronaveDTO> find(String termo) {
+        return aeronaveRepository.findByTermo(termo).stream().map(AeronaveDTO::from).toList();
     }
 
     @Transactional(readOnly = true)
-    public Aeronave findById(Long id) {
-        return aeronaveRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Aeronave Não Encontrada: " + id));
+    public AeronaveDTO findById(Long id) {
+        return AeronaveDTO.from(aeronaveRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Aeronave Não Encontrada: " + id)));
     }
 
     @Transactional
-    public Aeronave save(Aeronave aeronave) {
-        return aeronaveRepository.save(aeronave);
+    public AeronaveDTO save(AeronaveDTO aeronave) {
+        return AeronaveDTO.from(aeronaveRepository.save(AeronaveDTO.to(aeronave)));
     }
 
     @Transactional
-    public Aeronave updateById(Long id, Aeronave aeronave) {
-        return aeronaveRepository.save(aeronave);
+    public AeronaveDTO updateById(Long id, AeronaveDTO aeronave) {
+        return AeronaveDTO.from(aeronaveRepository.save(AeronaveDTO.to(aeronave)));
     }
 
     @Transactional
@@ -66,8 +67,8 @@ public class AeronaveService {
     }
 
     @Transactional(readOnly = true)
-    public List<Aeronave> findByNaoVendido(){
-      return aeronaveRepository.findByVendidoFalse();
+    public List<AeronaveDTO> findByNaoVendido(){
+      return aeronaveRepository.findByVendidoFalse().stream().map(AeronaveDTO::from).toList();
     }
 
     @Transactional(readOnly = true)
@@ -98,13 +99,16 @@ public class AeronaveService {
     }
 
     @Transactional
-    public AeronaveDTO patch(Long id, AeronaveDTO aeronaveDTO){
-        Aeronave aeronave = findById(id);
-        if(aeronaveDTO.fabricante() != null) aeronave.setFabricante(aeronaveDTO.fabricante());
-        if(aeronaveDTO.nome() != null) aeronave.setNome(aeronaveDTO.nome());
-        if(aeronaveDTO.anoFabricacao() != null) aeronave.setAnoFabricacao(aeronaveDTO.anoFabricacao());
-        if(aeronaveDTO.vendido() != null) aeronave.setVendido(aeronaveDTO.vendido());
+    public AeronavePatchDTO patch(Long id, AeronavePatchDTO aeronavePatchDTO){
+        Aeronave aeronave = aeronaveRepository.findById(id)
+                .orElseThrow(()-> new EntityNotFoundException("Aeronave não Encontrada " + id));
+
+        if(aeronavePatchDTO.fabricante() != null) aeronave.setFabricante(aeronavePatchDTO.fabricante());
+        if(aeronavePatchDTO.nome() != null) aeronave.setNome(aeronavePatchDTO.nome());
+        if(aeronavePatchDTO.anoFabricacao() != null) aeronave.setAnoFabricacao(aeronavePatchDTO.anoFabricacao());
+        if(aeronavePatchDTO.vendido() != null) aeronave.setVendido(aeronavePatchDTO.vendido());
+
         aeronave.setUpdateAt(OffsetDateTime.now());
-        return AeronaveDTO.from(aeronaveRepository.save(aeronave));
+        return AeronavePatchDTO.from(aeronaveRepository.save(aeronave));
     }
 }
